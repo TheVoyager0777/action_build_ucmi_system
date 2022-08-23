@@ -13,6 +13,7 @@ jobs:
         runs-on:
           - ubuntu-20.04
           - ubuntu-22.04
+          - ubuntu-18.04
     runs-on: ${{ matrix.runs-on }}
     steps:
       - uses: actions/checkout@master
@@ -21,10 +22,16 @@ jobs:
           echo "date=$(echo ${{ github.event.inputs.URL }} | cut -d"/" -f4)" >> $GITHUB_ENV
           if [[ "$(cat /etc/issue | grep 22.04)" == "" ]]; then
               echo "device=cmi" >> $GITHUB_ENV
+              echo "codename=CMIPRE" >> $GITHUB_ENV
               echo "ORIGN_ZIP_NAME=miui_CMIPRE_22.7.19_c47f96254e_12.0.zip" >> $GITHUB_ENV
-          else
+          elif [[ "$(cat /etc/issue | grep 20.04)" == "" ]]; then
               echo "device=umi" >> $GITHUB_ENV
+              echo "codename=UMIPRE" >> $GITHUB_ENV
               echo "ORIGN_ZIP_NAME=miui_UMIPRE_22.7.19_c2ae8f91d4_12.0.zip" >> $GITHUB_ENV
+          else
+              echo "device=cas" >> $GITHUB_ENV
+              echo "codename=CASPRE" >> $GITHUB_ENV
+              echo "ORIGN_ZIP_NAME=miui_CASPRE_22.8.23_c5f68eb61d_12.0.zip" >> $GITHUB_ENV
           fi
           sudo apt install python3 python3-pip aria2 zip p7zip-full tar zipalign
           sudo apt --fix-broken install
@@ -48,17 +55,22 @@ jobs:
           if [[ "${{ env.device }}" == "umi" ]]; then
               curl -i -X POST -H 'Content-type':'application/json' -d '{"appToken":"${{secrets.appToken}}","summary":"小米10 ${{env.date}}开始构建","content":" **小米10 ${{env.date}}开始构建** ","topicIds":[7121],"contentType":3}' http://wxpusher.zjiecode.com/api/send/message || true
               curl -i -X POST -H 'Content-type':'application/json' -d '{"token":"${{secrets.appToken2}}","title":"小米10 ${{env.date}}开始构建","content":" **小米10 ${{env.date}}开始构建** ","topic":"umi","template":"markdown"}' http://www.pushplus.plus/send || true
-          else
+          elif [[ "${{ env.device }}" == "cmi" ]]; then
               curl -i -X POST -H 'Content-type':'application/json' -d '{"appToken":"${{secrets.appToken}}","summary":"小米10Pro ${{env.date}}开始构建","content":" **小米10Pro ${{env.date}}开始构建** ","topicIds":[7122],"contentType":3}' http://wxpusher.zjiecode.com/api/send/message || true
               curl -i -X POST -H 'Content-type':'application/json' -d '{"token":"${{secrets.appToken2}}","title":"小米10Pro ${{env.date}}开始构建","content":" **小米10Pro ${{env.date}}开始构建** ","topic":"cmi","template":"markdown"}' http://www.pushplus.plus/send || true
+          else
+              curl -i -X POST -H 'Content-type':'application/json' -d '{"appToken":"${{secrets.appToken}}","summary":"小米10Ultra ${{env.date}}开始构建","content":" **小米10Ultra ${{env.date}}开始构建** ","topicIds":[7123],"contentType":3}' http://wxpusher.zjiecode.com/api/send/message || true
+              curl -i -X POST -H 'Content-type':'application/json' -d '{"token":"${{secrets.appToken2}}","title":"小米10Ultra ${{env.date}}开始构建","content":" **小米10Ultra ${{env.date}}开始构建** ","topic":"cmi","template":"markdown"}' http://www.pushplus.plus/send || true
           fi
       - name: 3.下载系统包
         run: |
           aria2c -x16 -j$(nproc) -U "Mozilla/5.0" -d "$GITHUB_WORKSPACE" ${{ github.event.inputs.URL }}
           if [[ "${{ env.device }}" == "umi" ]]; then
               aria2c -x16 -j$(nproc) -U "Mozilla/5.0" -d "$GITHUB_WORKSPACE" https://hugeota.d.miui.com/22.7.19/miui_UMIPRE_22.7.19_c2ae8f91d4_12.0.zip
-          else
+          elif [[ "${{ env.device }}" == "cmi" ]]; then
               aria2c -x16 -j$(nproc) -U "Mozilla/5.0" -d "$GITHUB_WORKSPACE" https://hugeota.d.miui.com/22.7.19/miui_CMIPRE_22.7.19_c47f96254e_12.0.zip
+          else
+              aria2c -x16 -j$(nproc) -U "Mozilla/5.0" -d "$GITHUB_WORKSPACE" https://hugeota.d.miui.com/22.8.23/miui_CASPRE_22.8.23_c5f68eb61d_12.0.zip
           fi
       - name: 4.解包
         run: |
@@ -170,9 +182,12 @@ jobs:
           if [[ "${{ env.device }}" == "umi" ]]; then
               sudo sed -i 's/ro.product.mod_device=[^*]*/ro.product.mod_device=umi_pre/' "$GITHUB_WORKSPACE"/images/system/system/build.prop
               sudo sed -i 's/ro.miui.cust_device=[^*]*/ro.miui.cust_device=umi/' "$GITHUB_WORKSPACE"/images/system/system/build.prop
-          else
+          elif [[ "${{ env.device }}" == "cmi" ]]; then
               sudo sed -i 's/ro.product.mod_device=[^*]*/ro.product.mod_device=cmi_pre/' "$GITHUB_WORKSPACE"/images/system/system/build.prop
               sudo sed -i 's/ro.miui.cust_device=[^*]*/ro.miui.cust_device=cmi/' "$GITHUB_WORKSPACE"/images/system/system/build.prop
+          else
+              sudo sed -i 's/ro.product.mod_device=[^*]*/ro.product.mod_device=cas_pre/' "$GITHUB_WORKSPACE"/images/system/system/build.prop
+              sudo sed -i 's/ro.miui.cust_device=[^*]*/ro.miui.cust_device=cas/' "$GITHUB_WORKSPACE"/images/system/system/build.prop
           fi
           # 声音动效动画 By PedroZ
           sudo unzip -o -q "$GITHUB_WORKSPACE"/${{ env.device }}_files/etc.zip -d "$GITHUB_WORKSPACE"/images/system/system/etc/audio/
@@ -219,42 +234,38 @@ jobs:
           sed -i "s/vendor_size/$vendor_size/g" "$GITHUB_WORKSPACE"/images/dynamic_partitions_op_list
           sed -i "s/system_size/$system_size/g" "$GITHUB_WORKSPACE"/images/dynamic_partitions_op_list
           sed -i "s/system_ext_size/$system_ext_size/g" "$GITHUB_WORKSPACE"/images/dynamic_partitions_op_list
-          if [[ "${{ env.device }}" == "umi" ]]; then
-              sudo 7z a "$GITHUB_WORKSPACE"/zip/miui_UMIPRE_${{ env.date }}.zip "$GITHUB_WORKSPACE"/images/*
-              sudo rm -rf "$GITHUB_WORKSPACE"/images
-              md5=$(md5sum "$GITHUB_WORKSPACE"/zip/miui_UMIPRE_${{ env.date }}.zip)
-              echo "MD5=${md5:0:32}" >> $GITHUB_ENV
-              MD5=${md5:0:32}
-              zipmd5=${md5:0:10}
-              mv "$GITHUB_WORKSPACE"/zip/miui_UMIPRE_${{ env.date }}.zip "$GITHUB_WORKSPACE"/zip/miui_UMIPRE_"${{ env.date }}"_"$zipmd5"_12.0.zip
-              echo "NEW_PACKAGE_NAME=miui_UMIPRE_"${{ env.date }}"_"$zipmd5"_12.0.zip" >> $GITHUB_ENV
-              NEW_PACKAGE_NAME=miui_UMIPRE_"${{ env.date }}"_"$zipmd5"_12.0.zip
-          else
-              sudo 7z a "$GITHUB_WORKSPACE"/zip/miui_CMIPRE_${{ env.date }}.zip "$GITHUB_WORKSPACE"/images/*
-              sudo rm -rf "$GITHUB_WORKSPACE"/images
-              md5=$(md5sum "$GITHUB_WORKSPACE"/zip/miui_CMIPRE_${{ env.date }}.zip)
-              echo "MD5=${md5:0:32}" >> $GITHUB_ENV
-              zipmd5=${md5:0:10}
-              mv "$GITHUB_WORKSPACE"/zip/miui_CMIPRE_${{ env.date }}.zip "$GITHUB_WORKSPACE"/zip/miui_CMIPRE_"${{ env.date }}"_"$zipmd5"_12.0.zip
-              echo "NEW_PACKAGE_NAME=miui_CMIPRE_"${{ env.date }}"_"$zipmd5"_12.0.zip" >> $GITHUB_ENV
-          fi
+          sudo 7z a "$GITHUB_WORKSPACE"/zip/miui_${{ env.codename }}_${{ env.date }}.zip "$GITHUB_WORKSPACE"/images/*
+          sudo rm -rf "$GITHUB_WORKSPACE"/images
+          md5=$(md5sum "$GITHUB_WORKSPACE"/zip/miui_${{ env.codename }}_${{ env.date }}.zip)
+          echo "MD5=${md5:0:32}" >> $GITHUB_ENV
+          MD5=${md5:0:32}
+          zipmd5=${md5:0:10}
+          mv "$GITHUB_WORKSPACE"/zip/miui_${{ env.codename }}_${{ env.date }}.zip "$GITHUB_WORKSPACE"/zip/miui_${{ env.codename }}_"${{ env.date }}"_"$zipmd5"_12.0.zip
+          echo "NEW_PACKAGE_NAME=miui_${{ env.codename }}_"${{ env.date }}"_"$zipmd5"_12.0.zip" >> $GITHUB_ENV
+
       - name: 7.上传到123盘
         run: |
           if [[ "${{ env.device }}" == "umi" ]]; then
               rclone mkdir 123pan:/UMI_Packages
               rclone sync -P ./zip/* 123pan:/UMI_Packages
-          else
+          elif [[ "${{ env.device }}" == "cmi" ]]; then
               rclone mkdir 123pan:/CMI_Packages
               rclone sync -P ./zip/* 123pan:/CMI_Packages
+          else
+              rclone mkdir 123pan:/CAS_Packages
+              rclone sync -P ./zip/* 123pan:/CAS_Packages
           fi
       - name: 8.发送打包成功通知
         run: |
           if [[ "${{ env.device }}" == "umi" ]]; then
               curl -i -X POST -H 'Content-type':'application/json' -d '{"appToken":"${{secrets.appToken}}","summary":"小米10 ${{env.date}}已构建完成","content":" **小米10 ${{env.date}}已构建完成** \n \n **包名：${{env.NEW_PACKAGE_NAME}}** \n \n **MD5：${{env.MD5}}** \n \n 下载地址为：[https://www.123pan.com/s/jKv8Vv-SiDWd](https://www.123pan.com/s/jKv8Vv-SiDWd) ","topicIds":[7121],"contentType":3}' http://wxpusher.zjiecode.com/api/send/message || true
               curl -i -X POST -H 'Content-type':'application/json' -d '{"token":"${{secrets.appToken2}}","title":"小米10 ${{env.date}}已构建完成","content":" **小米10 ${{env.date}}已构建完成** \n \n **包名：${{env.NEW_PACKAGE_NAME}}** \n \n **MD5：${{env.MD5}}** \n \n **下载地址为：[https://www.123pan.com/s/jKv8Vv-SiDWd](https://www.123pan.com/s/jKv8Vv-SiDWd)** ","topic":"umi","template":"markdown"}' http://www.pushplus.plus/send || true
-          else
+          elif [[ "${{ env.device }}" == "cmi" ]]; then
               curl -i -X POST -H 'Content-type':'application/json' -d '{"appToken":"${{secrets.appToken}}","summary":"小米10Pro ${{env.date}}已构建完成","content":" **小米10Pro ${{env.date}}已构建完成** \n \n **包名：${{env.NEW_PACKAGE_NAME}}** \n \n **MD5：${{env.MD5}}** \n \n 下载地址为：[https://www.123pan.com/s/jKv8Vv-liDWd](https://www.123pan.com/s/jKv8Vv-liDWd) ","topicIds":[7122],"contentType":3}' http://wxpusher.zjiecode.com/api/send/message || true
               curl -i -X POST -H 'Content-type':'application/json' -d '{"token":"${{secrets.appToken2}}","title":"小米10Pro ${{env.date}}已构建完成","content":" **小米10Pro ${{env.date}}已构建完成** \n \n **包名：${{env.NEW_PACKAGE_NAME}}** \n \n **MD5：${{env.MD5}}** \n \n **下载地址为：[https://www.123pan.com/s/jKv8Vv-SiDWd](https://www.123pan.com/s/jKv8Vv-SiDWd)** ","topic":"cmi","template":"markdown"}' http://www.pushplus.plus/send || true
+          else
+              curl -i -X POST -H 'Content-type':'application/json' -d '{"appToken":"${{secrets.appToken}}","summary":"小米10Ultra ${{env.date}}已构建完成","content":" **小米10Ultra ${{env.date}}已构建完成** \n \n **包名：${{env.NEW_PACKAGE_NAME}}** \n \n **MD5：${{env.MD5}}** \n \n 下载地址为：[https://www.123pan.com/s/jKv8Vv-liDWd](https://www.123pan.com/s/jKv8Vv-liDWd) ","topicIds":[7122],"contentType":3}' http://wxpusher.zjiecode.com/api/send/message || true
+              curl -i -X POST -H 'Content-type':'application/json' -d '{"token":"${{secrets.appToken2}}","title":"小米10Ultra ${{env.date}}已构建完成","content":" **小米10Ultra ${{env.date}}已构建完成** \n \n **包名：${{env.NEW_PACKAGE_NAME}}** \n \n **MD5：${{env.MD5}}** \n \n **下载地址为：[https://www.123pan.com/s/jKv8Vv-SiDWd](https://www.123pan.com/s/jKv8Vv-SiDWd)** ","topic":"cmi","template":"markdown"}' http://www.pushplus.plus/send || true
           fi
           mkdir "$GITHUB_WORKSPACE"/romdata && touch "$GITHUB_WORKSPACE"/romdata/${{ env.device }}.ini
           echo ${{ env.device }}PKG=${{ env.NEW_PACKAGE_NAME }} >> "$GITHUB_WORKSPACE"/romdata/${{ env.device }}.ini
