@@ -98,10 +98,10 @@ jobs:
           # 删除推广
           sudo rm -rf "$GITHUB_WORKSPACE"/images/product/data-app
           # 添加munch的/system/build.prop
-          sudo echo "ro.sf.lcd_density=440" >> "$GITHUB_WORKSPACE"/images/system/system/build.prop
+          sudo sh -c 'echo "ro.sf.lcd_density=440" >> "$GITHUB_WORKSPACE"/images/system/system/build.prop'
           # 修复NFC
           sudo unzip -o "$GITHUB_WORKSPACE"/${{ env.device }}_files/nfc.zip -d "$GITHUB_WORKSPACE"/images
-          sudo echo "persist.sys.disable_rescue=true" >> "$GITHUB_WORKSPACE"/images/system/system/build.prop
+          sudo sh -c 'echo "persist.sys.disable_rescue=true" >> "$GITHUB_WORKSPACE"/images/system/system/build.prop'
           # 替换Overlay
           sudo mv -f "$GITHUB_WORKSPACE"/${{ env.device }}_files/DevicesAndroidOverlay.apk "$GITHUB_WORKSPACE"/images/product/overlay
           sudo mv -f "$GITHUB_WORKSPACE"/${{ env.device }}_files/DevicesOverlay.apk "$GITHUB_WORKSPACE"/images/product/overlay
