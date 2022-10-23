@@ -89,9 +89,9 @@ jobs:
           sudo mv -f "$GITHUB_WORKSPACE"/images/vendor_munch/etc/selinux "$GITHUB_WORKSPACE"/${{ env.device }}/vendor/etc/selinux
           sudo rm -rf "$GITHUB_WORKSPACE"/images/vendor_munch
           # 修改cas的/vendor/build.prop
-          sed -i 's/ro.build.version.release=12/ro.build.version.release=13/g' "$GITHUB_WORKSPACE"/${{ env.device }}/vendor/build.prop
-          sed -i 's/ro.vendor.build.version.release=12/ro.vendor.build.version.release=13/g' "$GITHUB_WORKSPACE"/${{ env.device }}/vendor/build.prop
-          sed -i 's/ro.vendor.build.version.release_or_codename=12/ro.vendor.build.version.release_or_codename=13/g' "$GITHUB_WORKSPACE"/${{ env.device }}/vendor/build.prop
+          sudo sed -i 's/ro.build.version.release=12/ro.build.version.release=13/g' "$GITHUB_WORKSPACE"/${{ env.device }}/vendor/build.prop
+          sudo sed -i 's/ro.vendor.build.version.release=12/ro.vendor.build.version.release=13/g' "$GITHUB_WORKSPACE"/${{ env.device }}/vendor/build.prop
+          sudo sed -i 's/ro.vendor.build.version.release_or_codename=12/ro.vendor.build.version.release_or_codename=13/g' "$GITHUB_WORKSPACE"/${{ env.device }}/vendor/build.prop
           # 添加cas.xml
           sudo rm -rf "$GITHUB_WORKSPACE"/images/product/etc/device_features/*
           sudo cp -f "$GITHUB_WORKSPACE"/${{ env.device }}_files/${{ env.device }}.xml "$GITHUB_WORKSPACE"/images/product/etc/device_features
