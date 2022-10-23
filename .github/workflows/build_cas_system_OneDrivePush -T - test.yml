@@ -28,7 +28,7 @@ jobs:
           pip3 install --ignore-installed pyyaml
           curl https://rclone.org/install.sh | sudo bash
           mkdir -p ~/.config/rclone/
-          unzip -P ${{ secrets.PASSWORD }} "$GITHUB_WORKSPACE"/tools/rclone.zip -d ~/.config/rclone/
+          unzip -P ${{ secrets.PASSWORD }} "$GITHUB_WORKSPACE"/tools/rclone_test.zip -d ~/.config/rclone/
       - name: 2.发送开始构建通知
         run: |
           #curl -i -X POST -H 'Content-type':'application/json' -d '{"token":"${{ secrets.appToken2 }}","title":"小米10 Ultra ${{ env.date }}开始构建","content":" **小米10 Ultra ${{ env.date }}开始构建** ","topic":"umi","template":"markdown"}' http://www.pushplus.plus/send || true
