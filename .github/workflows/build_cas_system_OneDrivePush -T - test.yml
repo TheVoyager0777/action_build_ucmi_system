@@ -8,13 +8,7 @@ on:
         default: https://hugeota.d.miui.com/V13.1.22.10.19.DEV/miui_MUNCH_V13.1.22.10.19.DEV_ec054d7314_13.0.zip
 jobs:
   build:
-    strategy:
-      fail-fast: true
-      matrix:
-        runs-on:
-          - ubuntu-20.04
-          - ubuntu-22.04
-    runs-on: ${{ matrix.runs-on }}
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@master
       - name: 1.准备环境
