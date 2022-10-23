@@ -83,7 +83,7 @@ jobs:
       - name: 5.替换相关文件
         run: |
           # 替换为K40S的selinux
-          #sudo rm -rf "$GITHUB_WORKSPACE"/${{ env.device }}/vendor/etc/selinux
+          sudo rm -rf "$GITHUB_WORKSPACE"/${{ env.device }}/vendor/etc/selinux
           sudo mv -f "$GITHUB_WORKSPACE"/images/vendor_munch/etc/selinux "$GITHUB_WORKSPACE"/${{ env.device }}/vendor/etc
           sudo rm -rf "$GITHUB_WORKSPACE"/images/vendor_munch
           # 修改cas的/vendor/build.prop
