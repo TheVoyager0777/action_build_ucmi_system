@@ -31,8 +31,8 @@ jobs:
           unzip -P ${{ secrets.PASSWORD }} "$GITHUB_WORKSPACE"/tools/rclone.zip -d ~/.config/rclone/
       - name: 2.发送开始构建通知
         run: |
-              #curl -i -X POST -H 'Content-type':'application/json' -d '{"token":"${{ secrets.appToken2 }}","title":"小米10 Ultra ${{ env.date }}开始构建","content":" **小米10 Ultra ${{ env.date }}开始构建** ","topic":"umi","template":"markdown"}' http://www.pushplus.plus/send || true
-              echo 开始打包
+          #curl -i -X POST -H 'Content-type':'application/json' -d '{"token":"${{ secrets.appToken2 }}","title":"小米10 Ultra ${{ env.date }}开始构建","content":" **小米10 Ultra ${{ env.date }}开始构建** ","topic":"umi","template":"markdown"}' http://www.pushplus.plus/send || true
+          echo 开始打包
       - name: 3.下载系统包
         run: |
           aria2c -x16 -j$(nproc) -U "Mozilla/5.0" -d "$GITHUB_WORKSPACE" ${{ github.event.inputs.URL }}
@@ -71,10 +71,8 @@ jobs:
               sudo python3 "$GITHUB_WORKSPACE"/tools/imgextractorLinux.py "$GITHUB_WORKSPACE"/images/$i.img "$GITHUB_WORKSPACE"/images
               rm -rf "$GITHUB_WORKSPACE"/images/$i.img
           done
-
           "$GITHUB_WORKSPACE"/tools/payload-dumper-go -p system_ext "$GITHUB_WORKSPACE"/MUNCH/payload.bin
           mv "$GITHUB_WORKSPACE"/payload/system_ext.img "$GITHUB_WORKSPACE"/images/system_ext.img
-
           "$GITHUB_WORKSPACE"/tools/payload-dumper-go -p vendor "$GITHUB_WORKSPACE"/MUNCH/payload.bin
           mv "$GITHUB_WORKSPACE"/payload/vendor.img "$GITHUB_WORKSPACE"/images/vendor_munch.img
           sudo python3 "$GITHUB_WORKSPACE"/tools/imgextractorLinux.py "$GITHUB_WORKSPACE"/images/vendor_munch.img "$GITHUB_WORKSPACE"/images
@@ -114,6 +112,7 @@ jobs:
           sudo mv -f "$GITHUB_WORKSPACE"/${{ env.device }}_files/vbmeta_system.img "$GITHUB_WORKSPACE"/${{ env.device }}/firmware-update
           sudo unzip -o "$GITHUB_WORKSPACE"/tools/flashtools.zip -d "$GITHUB_WORKSPACE"/images
           sudo cp -r "$GITHUB_WORKSPACE"/${{ env.device }}/firmware-update "$GITHUB_WORKSPACE"/images
+          sudo mv -f "$GITHUB_WORKSPACE"/${{ env.device }}/boot.img "$GITHUB_WORKSPACE"/images/boot_official.img
           sudo mv -f "$GITHUB_WORKSPACE"/tools/super_empty.img "$GITHUB_WORKSPACE"/images/firmware-update
           sudo cp -r "$GITHUB_WORKSPACE"/${{ env.device }}/* "$GITHUB_WORKSPACE"/images
           sudo rm -rf "$GITHUB_WORKSPACE"/${{ env.device }}
@@ -165,7 +164,7 @@ jobs:
           rclone sync -P ./zip/* OneDrive:/MI_Packages/RubbishBin/CAS_Packages
       - name: 8.发送打包成功通知
         run: |
-          curl -i -X POST -H 'Content-type':'application/json' -d '{"token":"${{ secrets.appToken2 }}","title":"小米10 Ultra ${{ env.date }}已构建完成","content":" **小米10 Ultra ${{ env.date }}已构建完成** \n \n **包名：${{ env.NEW_PACKAGE_NAME }}** \n \n **MD5：${{ env.MD5 }}** \n \n **下载地址为：[https://onedrive.zjw.js.cn/Direct/RubbishBin/${{ env.NEW_PACKAGE_NAME }}](https://onedrive.zjw.js.cn/Direct/RubbishBin/${{ env.NEW_PACKAGE_NAME }})** ","topic":"umi","template":"markdown"}' http://www.pushplus.plus/send || true
+          #curl -i -X POST -H 'Content-type':'application/json' -d '{"token":"${{ secrets.appToken2 }}","title":"小米10 Ultra ${{ env.date }}已构建完成","content":" **小米10 Ultra ${{ env.date }}已构建完成** \n \n **包名：${{ env.NEW_PACKAGE_NAME }}** \n \n **MD5：${{ env.MD5 }}** \n \n **下载地址为：[https://onedrive.zjw.js.cn/Direct/RubbishBin/${{ env.NEW_PACKAGE_NAME }}](https://onedrive.zjw.js.cn/Direct/RubbishBin/${{ env.NEW_PACKAGE_NAME }})** ","topic":"umi","template":"markdown"}' http://www.pushplus.plus/send || true
           echo 上传成功  
       - name: 9.删除工作流运行
         uses: Mattraks/delete-workflow-runs@v2
