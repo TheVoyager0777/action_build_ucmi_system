@@ -5,7 +5,7 @@ on:
       URL:
         description: "待操作的系统包下载地址"
         required: true
-        default: https://hugeota.d.miui.com/V13.1.22.10.19.DEV/miui_MUNCH_V13.1.22.10.19.DEV_ec054d7314_13.0.zip
+        default: https://hugeota.d.miui.com/V13.1.22.10.25.DEV/miui_MUNCH_V13.1.22.10.25.DEV_58fa98199e_13.0.zip
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -15,7 +15,7 @@ jobs:
         run: |
           echo "date=$(echo ${{ github.event.inputs.URL }} | cut -d"/" -f4)" >> $GITHUB_ENV
           echo "device=cas" >> $GITHUB_ENV
-          echo "ORIGN_ZIP_NAME=miui_CASPRE_22.10.19_186d7d9030_12.0.zip" >> $GITHUB_ENV
+          echo "ORIGN_ZIP_NAME=miui_CASPRE_22.10.26_d432264f3a_12.0.zip" >> $GITHUB_ENV
           sudo apt install python3 python3-pip aria2 zip p7zip-full tar zipalign zstd
           sudo apt --fix-broken install
           sudo apt update --fix-missing
@@ -36,7 +36,7 @@ jobs:
       - name: 3.下载系统包
         run: |
           aria2c -x16 -j$(nproc) -U "Mozilla/5.0" -d "$GITHUB_WORKSPACE" ${{ github.event.inputs.URL }}
-          aria2c -x16 -j$(nproc) -U "Mozilla/5.0" -d "$GITHUB_WORKSPACE" https://hugeota.d.miui.com/22.10.19/miui_CASPRE_22.10.19_186d7d9030_12.0.zip
+          aria2c -x16 -j$(nproc) -U "Mozilla/5.0" -d "$GITHUB_WORKSPACE" https://hugeota.d.miui.com/22.10.26/miui_CASPRE_22.10.26_d432264f3a_12.0.zip
       - name: 4.解包
         run: |
           sudo chmod 777 "$GITHUB_WORKSPACE"/tools/payload-dumper-go
@@ -112,8 +112,9 @@ jobs:
           sudo mv -f "$GITHUB_WORKSPACE"/${{ env.device }}_files/vbmeta_system.img "$GITHUB_WORKSPACE"/${{ env.device }}/firmware-update
           sudo unzip -o "$GITHUB_WORKSPACE"/tools/flashtools.zip -d "$GITHUB_WORKSPACE"/images
           sudo cp -r "$GITHUB_WORKSPACE"/${{ env.device }}/firmware-update "$GITHUB_WORKSPACE"/images
-          sudo mv -f "$GITHUB_WORKSPACE"/${{ env.device }}/boot.img "$GITHUB_WORKSPACE"/images/boot_official.img
           sudo mv -f "$GITHUB_WORKSPACE"/tools/super_empty.img "$GITHUB_WORKSPACE"/images/firmware-update
+          sudo tar -zxvf "$GITHUB_WORKSPACE"/${{ env.device }}_files/boot_official.tar.gz -C "$GITHUB_WORKSPACE"/images
+          sudo tar -zxvf "$GITHUB_WORKSPACE"/${{ env.device }}_files/boot_magisk.tar.gz -C "$GITHUB_WORKSPACE"/images
           sudo cp -r "$GITHUB_WORKSPACE"/${{ env.device }}/* "$GITHUB_WORKSPACE"/images
           sudo rm -rf "$GITHUB_WORKSPACE"/${{ env.device }}
           sudo rm -rf "$GITHUB_WORKSPACE"/images/system/system/app/Updater
