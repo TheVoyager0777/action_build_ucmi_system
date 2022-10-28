@@ -99,6 +99,7 @@ jobs:
           echo "ro.sf.lcd_density=440" | sudo tee -a "$GITHUB_WORKSPACE"/images/system/system/build.prop
           # 修复NFC
           sudo unzip -o "$GITHUB_WORKSPACE"/${{ env.device }}_files/nfc.zip -d "$GITHUB_WORKSPACE"/images
+          sudo cp -rf "$GITHUB_WORKSPACE"/images/product/pangu/system "$GITHUB_WORKSPACE"/images/system
           echo "persist.sys.disable_rescue=true" | sudo tee -a "$GITHUB_WORKSPACE"/images/system/system/build.prop
           # 替换Overlay
           sudo mv -f "$GITHUB_WORKSPACE"/${{ env.device }}_files/DevicesAndroidOverlay.apk "$GITHUB_WORKSPACE"/images/product/overlay
