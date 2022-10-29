@@ -33,7 +33,7 @@ jobs:
         run: |
           #curl -i -X POST -H 'Content-type':'application/json' -d '{"token":"${{ secrets.APPTOKEN2 }}","title":"小米10 Ultra ${{ env.date }}开始构建","content":" **小米10 Ultra ${{ env.date }}开始构建** ","topic":"cas","template":"html"}' http://www.pushplus.plus/send || true
           echo 开始打包
-        - name: 3.下载系统包
+      - name: 3.下载系统包
         run: |
           aria2c -x16 -j$(nproc) -U "Mozilla/5.0" -d "$GITHUB_WORKSPACE" ${{ github.event.inputs.URL }}
           aria2c -x16 -j$(nproc) -U "Mozilla/5.0" -d "$GITHUB_WORKSPACE" https://hugeota.d.miui.com/22.10.26/miui_CASPRE_22.10.26_d432264f3a_12.0.zip
