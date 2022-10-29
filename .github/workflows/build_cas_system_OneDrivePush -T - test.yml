@@ -31,7 +31,7 @@ jobs:
           unzip -P ${{ secrets.PASSWORD }} "$GITHUB_WORKSPACE"/tools/rclone_test.zip -d ~/.config/rclone/
       - name: 2.发送开始构建通知
         run: |
-          #curl -i -X POST -H 'Content-type':'application/json' -d '{"token":"${{ secrets.APPTOKEN2 }}","title":"小米10 Ultra ${{ env.date }}开始构建","content":" **小米10 Ultra ${{ env.date }}开始构建** ","topic":"cas","template":"html"}' http://www.pushplus.plus/send || true
+          #curl -i -X POST -H 'Content-type':'application/json' -d '{"token":"${{ secrets.APPTOKEN2 }}","title":"小米10 Ultra ${{ env.date }}开始构建","content":" **小米10 Ultra ${{ env.date }}开始构建** ","topic":"cas","template":"markdown"}' http://www.pushplus.plus/send || true
           echo 开始打包
       - name: 3.下载系统包
         run: |
